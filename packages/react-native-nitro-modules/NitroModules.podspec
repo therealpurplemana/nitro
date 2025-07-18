@@ -1,4 +1,5 @@
 require "json"
+require "./nitro_pod_utils"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
@@ -47,24 +48,32 @@ Pod::Spec.new do |s|
     "cpp/views/CachedProp.hpp",
     # Public iOS-specific headers that will be exposed in modulemap (for Swift)
     "ios/core/ArrayBufferHolder.hpp",
-    "ios/core/AnyMapHolder.hpp",
     "ios/core/PromiseHolder.hpp",
+    "ios/utils/AnyMapUtils.hpp",
     "ios/utils/Result.hpp",
     "ios/utils/DateToChronoDate.hpp",
     "ios/utils/RuntimeError.hpp",
     "ios/utils/SwiftClosure.hpp",
   ]
 
-  s.pod_target_xcconfig = {
+  xcconfig = {
     # Use C++ 20
     "CLANG_CXX_LANGUAGE_STANDARD" => "c++20",
     # Enables C++ <-> Swift interop (by default it's only C)
     "SWIFT_OBJC_INTEROP_MODE" => "objcxx",
     # Enables stricter modular headers
     "DEFINES_MODULE" => "YES",
-    # C++ compiler flags, mainly for RN version and folly.
-    "GCC_PREPROCESSOR_DEFINITIONS" => "$(inherited) FOLLY_NO_CONFIG FOLLY_CFG_NO_COROUTINES"
   }
+
+  if has_react_native()
+    react_native_version = get_react_native_version()
+    if (react_native_version < 80)
+      # C++ compiler flags, for folly when building as static framework:
+      xcconfig["GCC_PREPROCESSOR_DEFINITIONS"] = "$(inherited) FOLLY_NO_CONFIG FOLLY_CFG_NO_COROUTINES"
+    end
+  end
+
+  s.pod_target_xcconfig = xcconfig
 
   # Nitro depends on JSI.
   s.dependency 'React-jsi'

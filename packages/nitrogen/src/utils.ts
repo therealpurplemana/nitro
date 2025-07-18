@@ -4,6 +4,8 @@ import type { SwiftCxxHelper } from './syntax/swift/SwiftCxxTypeHelper.js'
 import type { Type } from 'ts-morph'
 import { isNotDuplicate } from './syntax/helpers.js'
 
+export const NITROGEN_VERSION = process.env.npm_package_version ?? '?.?.?'
+
 export function capitalizeName(name: string): string {
   if (name.length === 0) return name
   return name.charAt(0).toUpperCase() + name.slice(1)
